@@ -1,4 +1,8 @@
-;; Copyright (C) 1994-2004 Edward Bishop
+;;; vtags.el --- tags facility for Emacs
+
+;; Copyright (C) 1994-2005 Edward Bishop
+
+;; Keywords: tools
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -15,6 +19,8 @@
 ;; Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 ;; MA 02111-1307 USA
 
+
+;;; Commentary:
 
 ;;;;;;;;;;;;;;
 ;; Usage:
@@ -58,16 +64,33 @@
 ;; If your tag file has very long lines (>512) then you 
 ;; should increase chunk-size.
 
+;;; Code:
 
-(defvar vtags-case-fold nil)
+(require 'ring)
+;(require 'button)
+
+;;;###autoload
+(defvar vtags-file-name "~/tags")
+
+
+(defvar vtags-case-fold-search nil
+  "*File name of tags table.
+To switch to a new tags table, setting this variable is sufficient.
+If you set this variable, do not also set `tags-table-list'.
+Use the `tags' program to make a tags table file.")
+;; Make M-x set-variable tags-file-name like M-x visit-tags-table.
+;;;###autoload (put 'tags-file-name 'variable-interactive "fVisit tags table: ")
+
+(defgroup vtags nil "Tags tables"
+  :group 'tools)
 
 (defun vtags-toggle-casefold ()
   "*Non-nil if searches should ignore case.
 Note: case folding must
 match that used in tags file generation."
   (interactive)
-  (setq vtags-case-fold (not vtags-case-fold))
-  (message "case folding is %s" (if vtags-case-fold "ON" "OFF")))
+  (setq vtags-case-fold-search (not vtags-case-fold-search))
+  (message "case folding is %s" (if vtags-case-fold-search "ON" "OFF")))
 
 ;; vtags-look
 (defun vtags-look  (tag file output-buffer-name) 
@@ -95,7 +118,7 @@ match that used in tags file generation."
       (setq size  (nth 7 attr))
       (setq max (truncate (/ size blksize)))
       (set-buffer vtags-look-buf)
-      (if vtags-case-fold (setq tag (upcase tag)))
+      (if vtags-case-fold-search (setq tag (upcase tag)))
       ;;(message "vtags-look file is %s, size is %d" file size);
       ;;
       ;; Do a binary search on the file.
@@ -130,7 +153,7 @@ match that used in tags file generation."
               (buffer-substring-no-properties tmp-string-beg tmp-string-end))
         
         ;; Compare with tag
-        (if vtags-case-fold (setq tmp-string (upcase tmp-string)))
+        (if vtags-case-fold-search (setq tmp-string (upcase tmp-string)))
         (if (string-lessp tmp-string tag)
             (progn
               (setq min mid)
@@ -149,7 +172,7 @@ match that used in tags file generation."
        file nil beg (+ beg (* 2 blksize )))
       (if min (forward-line)) ;; skip past partial line
 
-      (setq case-fold-search vtags-case-fold)
+      (setq case-fold-search vtags-case-fold-search)
       ;;(message "case-fold-search is %s" case-fold-search)
       (search-forward tag)
       (beginning-of-line)
@@ -165,7 +188,7 @@ match that used in tags file generation."
             (progn 
               ;; are we past all lines which could match ?
               (setq tmp-string (substring tag-line 0 tag-length))
-              (if vtags-case-fold (setq tmp-string (upcase tmp-string)))
+              (if vtags-case-fold-search (setq tmp-string (upcase tmp-string)))
               (if (string-lessp tag tmp-string)
                   (setq done t)
                 ;; save lines which match
@@ -299,8 +322,6 @@ RETURN: default or value entered by user."
     (list (if (equal val "") def-tok val))))
 
 
-(defvar vtags-tagfile "~/tags")
-
 (defun vtags-find (tagname)
   "*Find tag whose name contains TAGNAME. If TAGNAME is a null string, 
 the expression in the buffer around or before point is used as the tag name.
@@ -309,17 +330,17 @@ in the *Vtags-Buffer*. There you can select the tag entry that
 you want using <RET>, f, or button-2. That is vtags-mode.
 There is also a *Vtag-History* buffer with the same mode."
   (interactive (vtags-vt-token "Find tag"))
-  (vtags-find-in-tagfiles tagname  (list vtags-tagfile) ))
+  (vtags-find-in-tagfiles tagname  (list vtags-file-name) ))
 
 (defun vtags-set-tagfile (tagfile)
   "vtags-set-tagfile: set the tagfile used by vtags-find."
   (interactive 
    (let* ((filename (read-file-name "tag file: " 
-                                    vtags-tagfile nil nil nil))
+                                    vtags-file-name nil nil nil))
           start end)
      (list filename)
      ))
-  (message "tagfile is %s" vtags-tagfile))
+  (message "tagfile is %s" vtags-file-name))
 
 (defun vtags-mouse-source (event)
   (interactive "e")
@@ -510,7 +531,7 @@ actually parses the tag entry."
   "Creates \"*Vtags-Completion-Buffer*\" creates an alist of matches to pattern"
   (save-excursion
     (let ((tag-buf (get-buffer-create vtags-completion-buffer-name))
-          (tmp-list (list vtags-tagfile))
+          (tmp-list (list vtags-file-name))
           (tag-path nil)
           (table nil))
       (set-buffer tag-buf)
