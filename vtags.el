@@ -134,9 +134,9 @@ match that used in tags file generation."
         (if (string-lessp tmp-string tag)
             (progn
               (setq min mid)
-              (message "%s < %s"  tmp-string tag)
+              ;; (message "%s < %s"  tmp-string tag)
               )
-          (message "%s >= %s"  tmp-string tag)
+          ;; (message "%s >= %s"  tmp-string tag)
           (setq max mid)))
       ;;
       ;; Begin linear search on block (actually 2 blocks since
@@ -535,12 +535,12 @@ actually parses the tag entry."
         (setq table (cons (vtags-get-tag) table))
         (while (and (eq (forward-line -1) 0))
           (setq table (cons (vtags-get-tag) table))))
-      (message "table is %s" (car table))
+      ;; (message "table is %s" (car table))
       table)))
 
 
 
-;;; dvr
+;;; qs
 
 (defun vtags-complete-symbol ()
   "The function used to do vtags-completion"
@@ -570,6 +570,100 @@ actually parses the tag entry."
 	       (display-completion-list list)))
 	   (message "Making completion list...%s" "done")))))
 
+;;; The following functions are 
+(defun vtags-list-tags ()
+  "Like etags list-tags. Display list of tags in file FILE.
+This searches only the first table in the list, and no included tables.
+FILE should be as it appeared in the `ctags' command, usually without a
+directory specification."
+  (interactive)
+)
+
+(defun vtags-tags-apropos ()
+  "Like etags tags-apropos. Display list of all tags in tags table REGEXP matches."
+  (interactive)
+)
+
+; xemacs only
+; (defun vtags-ctypes-tags ()
+;   "Like etags ctypes-tags."
+;   (interactive)
+; )
+
+; xemacs only
+; (defun vtags-smart-tags-file-list ()
+;   "Like etags smart-tags-file-list.
+;    Return appropriate tag files list for optional CURR-DIR-OR-FILENAME or for `default-directory'.
+;    Optional NAME-OF-TAGS-FILE is the literal filename (no directory) for which
+;    to look.  If no tags file is found, an error is signaled."
+;   (interactive)
+; )
+
+; xemacs only
+; (defun vtags-smart-tags-file-path ()
+;   "Like etags smart-tags-file-path."
+;   (interactive)
+; )
+
+(defun vtags-tags-query-replace ()
+  "Like etags tags-query-replace.
+`Query-replace-regexp' FROM with TO through all files listed in tags table.
+Third arg DELIMITED (prefix arg) means replace only word-delimited matches.
+If you exit (C-g or ESC), you can resume the query-replace
+with the command M-,."
+  (interactive)
+)
+
+(defun vtags-tags-search ()
+  "Like etags tags-search."
+  (interactive)
+)
+
+(defun vtags-visit-tags-table ()
+  "Like etags visit-tags-table.
+Tell tags commands to use tags table file FILE.
+FILE should be the name of a file created with the `etags' program.
+A directory name is ok too; it means file TAGS in that directory.
+
+Normally M-x visit-tags-table sets the global value of `tags-file-name'.
+With a prefix arg, set the buffer-local value instead.
+When you find a tag with M-., the buffer it finds the tag
+in is given a local value of this variable which is the name of the tags
+file the tag was in."
+  (interactive)
+)
+
+(defun tags-loop-continue ()
+  "Like etags tags-loop-continue.
+Continue last M-x tags-search or M-x tags-query-replace command.
+Used noninteractively with non-nil argument to begin such a command (the
+argument is passed to `next-file', which see).
+
+Two variables control the processing we do on each file: the value of
+`tags-loop-scan' is a form to be executed on each file to see if it is
+interesting (it returns non-nil if so) and `tags-loop-operate' is a form to
+evaluate to operate on an interesting file.  If the latter evaluates to
+nil, we exit; otherwise we scan the next file."
+  (interactive)
+)
+
+(defun select-tags-table ()
+  "Like etags select-tags-table.
+Select a tags table file from a menu of those you have already used.
+The list of tags tables to select from is stored in `tags-table-set-list';
+see the doc of that variable if you want to add names to the list."
+  (interactive)
+)
+
+(defun vtags-push-tag-mark ()
+  "Like etags push-tag-mark."
+  (interactive)
+  )
+
+(defun vtags-pop-tag-mark ()
+  "Like etags pop-tag-mark."
+  (interactive)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
 ;;                      placeholder stuff
