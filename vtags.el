@@ -70,10 +70,7 @@
 ;(require 'button)
 
 ;;;###autoload
-(defvar vtags-file-name "~/tags")
-
-
-(defvar vtags-case-fold-search nil
+(defvar vtags-file-name "~/tags"  
   "*File name of tags table.
 To switch to a new tags table, setting this variable is sufficient.
 If you set this variable, do not also set `tags-table-list'.
@@ -83,6 +80,166 @@ Use the `tags' program to make a tags table file.")
 
 (defgroup vtags nil "Tags tables"
   :group 'tools)
+
+(defcustom vtags-case-fold-search 'default
+  "*Whether tags operations should be case-sensitive.
+A value of t means case-insensitive, a value of nil means case-sensitive.
+Any other value means use the setting of `case-fold-search'."
+  :group 'vtags
+  :type '(choice (const :tag "Case-sensitive" nil)
+		 (const :tag "Case-insensitive" t)
+		 (other :tag "Use default" default))
+  :version "21.1")
+
+
+;;;###autoload
+(defcustom vtags-compression-info-list '("" ".Z" ".bz2" ".gz" ".tgz")
+  "*List of extensions tried by etags when jka-compr is used.
+An empty string means search the non-compressed file.
+These extensions will be tried only if jka-compr was activated
+\(i.e. via customize of `auto-compression-mode' or by calling the function
+`auto-compression-mode')."
+  :type  '(repeat string)
+  :group 'etags)
+
+;; !!! vtags-compression-info-list should probably be replaced by access
+;; to directory list and matching jka-compr-compression-info-list. Currently,
+;; this implementation forces each modification of
+;; jka-compr-compression-info-list to be reflected in this var.
+;; An alternative could be to say that introducing a special
+;; element in this list (e.g. t) means : try at this point
+;; using directory listing and regexp matching using
+;; jka-compr-compression-info-list.
+
+
+;;;###autoload
+(defcustom vtags-add-tables 'ask-user
+  "*Control whether to add a new tags table to the current list.
+t means do; nil means don't (always start a new list).
+Any other value means ask the user whether to add a new tags table
+to the current list (as opposed to starting a new list)."
+  :group 'etags
+  :type '(choice (const :tag "Do" t)
+		 (const :tag "Don't" nil)
+		 (other :tag "Ask" ask-user)))
+
+(defcustom vtags-revert-without-query nil
+  "*Non-nil means reread a TAGS table without querying, if it has changed."
+  :group 'etags
+  :type 'boolean)
+
+(defvar vtags-table-computed-list nil
+  "List of tags tables to search, computed from `tags-table-list'.
+This includes tables implicitly included by other tables.  The list is not
+always complete: the included tables of a table are not known until that
+table is read into core.  An element that is t is a placeholder
+indicating that the preceding element is a table that has not been read
+into core and might contain included tables to search.
+See `tags-table-check-computed-list'.")
+
+(defvar vtags-table-computed-list-for nil
+  "Value of `tags-table-list' that `tags-table-computed-list' corresponds to.
+If `tags-table-list' changes, `tags-table-computed-list' is thrown away and
+recomputed; see `tags-table-check-computed-list'.")
+
+(defvar vtags-table-list-pointer nil
+  "Pointer into `tags-table-computed-list' for the current state of searching.
+Use `visit-tags-table-buffer' to cycle through tags tables in this list.")
+
+(defvar vtags-table-list-started-at nil
+  "Pointer into `tags-table-computed-list', where the current search started.")
+
+(defvar vtags-table-set-list nil
+  "List of sets of tags table which have been used together in the past.
+Each element is a list of strings which are file names.")
+
+;;;###autoload
+(defcustom vtags-find-tag-hook nil
+  "*Hook to be run by \\[find-tag] after finding a tag.  See `run-hooks'.
+The value in the buffer in which \\[find-tag] is done is used,
+not the value in the buffer \\[find-tag] goes to."
+  :group 'vtags
+  :type 'hook)
+
+;;;###autoload
+(defcustom vtags-find-tag-default-function nil
+  "*A function of no arguments used by \\[find-tag] to pick a default tag.
+If nil, and the symbol that is the value of `major-mode'
+has a `find-tag-default-function' property (see `put'), that is used.
+Otherwise, `find-tag-default' is used."
+  :group 'vtags
+  :type '(choice (const nil) function))
+
+(defcustom vtags-find-tag-marker-ring-length 16
+  "*Length of marker rings `vtags-find-tag-marker-ring' and `vtags-location-ring'."
+  :group 'vtags
+  :type 'integer
+  :version "20.3")
+
+(defcustom vtags-tag-face 'default
+  "*Face for tags in the output of `tags-apropos'."
+  :group 'vtags
+  :type 'face
+  :version "21.1")
+
+(defcustom vtags-apropos-verbose nil
+  "If non-nil, print the name of the tags file in the *Tags List* buffer."
+  :group 'vtags
+  :type 'boolean
+  :version "21.1")
+
+(defcustom vtags-apropos-additional-actions nil
+  "Specify additional actions for `tags-apropos'.
+
+If non-nil, value should be a list of triples (TITLE FUNCTION
+TO-SEARCH).  For each triple, `tags-apropos' processes TO-SEARCH and
+lists tags from it.  TO-SEARCH should be an alist, obarray, or symbol.
+If it is a symbol, the symbol's value is used.
+TITLE, a string, is a title used to label the additional list of tags.
+FUNCTION is a function to call when a symbol is selected in the
+*Tags List* buffer.  It will be called with one argument SYMBOL which
+is the symbol being selected.
+
+Example value:
+
+  '((\"Emacs Lisp\" Info-goto-emacs-command-node obarray)
+    (\"Common Lisp\" common-lisp-hyperspec common-lisp-hyperspec-obarray)
+    (\"SCWM\" scwm-documentation scwm-obarray))"
+  :group 'vtags
+  :type '(repeat (list (string :tag "Title")
+		       function
+		       (sexp :tag "Tags to search")))
+  :version "21.1")
+
+(defvar vtags-find-tag-marker-ring (make-ring vtags-find-tag-marker-ring-length)
+  "Ring of markers which are locations from which \\[find-tag] was invoked.")
+
+(defvar vtags-default-tags-table-function nil
+  "If non-nil, a function to choose a default tags file for a buffer.
+This function receives no arguments and should return the default
+tags table file to use for the current buffer.")
+
+(defvar vtags-location-ring (make-ring vtags-find-tag-marker-ring-length)
+  "Ring of markers which are locations visited by \\[find-tag].
+Pop back to the last location with \\[negative-argument] \\[find-tag].")
+
+;; Tags table state.
+;; These variables are local in tags table buffers.
+
+(defvar vtags-table-files nil
+  "List of file names covered by current tags table.
+nil means it has not yet been computed; use `tags-table-files' to do so.")
+
+(defvar vtags-completion-table nil
+  "Obarray of tag names defined in current tags table.")
+
+(defvar vtags-included-tables nil
+  "List of tags tables included by the current tags table.")
+
+(defvar vtags-next-file-list nil
+  "List of files for \\[next-file] to process.")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun vtags-toggle-casefold ()
   "*Non-nil if searches should ignore case.
