@@ -3,8 +3,8 @@
 ;; Copyright (C) 1997 by Wayne Mesard
 
 ;; Author: Wayne Mesard <wmesard@sgi.com>
-;;	Tom Breton <tob@world.std.com>
-;;	Edward Bishop
+;;        Tom Breton <tob@world.std.com>
+;;        Edward Bishop
 ;; Last modified: 2005-05-14
 ;; Version: 1.5.0-EEB
 ;; Keywords: lisp, tools, maint
@@ -142,9 +142,9 @@
       )
 
       ("Implicit test with a calculated comparand"
-	(/ 30 2)
-	(* 3 5)
-	)
+        (/ 30 2)
+        (* 3 5)
+        )
 
      ("Explicit test"
        (/ 30 2)
@@ -206,22 +206,22 @@
     '("Demonstrations of error recognition"
 
        ( "Expect an error of some kind, using regress-got-error"
-	 (+ "Not a number" "Not one either")
-	 :test
-	 (regress-got-error RESULT))
+         (+ "Not a number" "Not one either")
+         :test
+         (regress-got-error RESULT))
        
        ( "Expect a specific error."
-	 (+ "Not a number" "Not one either")
-	 :test
-	 (equal (car RESULT)  'wrong-type-argument))
+         (+ "Not a number" "Not one either")
+         :test
+         (equal (car RESULT)  'wrong-type-argument))
 
        ("DELIBERATE FAILURE: Demonstrate that an error thrown by the
 grader expression itself will not masquerade as a successful test"
        t
        :test
-	 (progn 
-	   (error "Not a real error, but an incredible simulation")
-	   t))
+         (progn 
+           (error "Not a real error, but an incredible simulation")
+           t))
 
        ))
 
@@ -229,18 +229,18 @@ grader expression itself will not masquerade as a successful test"
   (defvar demo6 
     '("Demonstrations of failure indication."
        ("DELIBERATE FAILURE: demonstrate FAILURE-INDICATION"
-	 t
-	 (progn
-	   (setq FAILURE-INDICATION 
-	     "Show this object if the test fails")
-	   nil))
+         t
+         (progn
+           (setq FAILURE-INDICATION 
+             "Show this object if the test fails")
+           nil))
 
        (
-	t
-	(progn
-	  (setq FAILURE-INDICATION 
-	    "FAILURE-INDICATION is not seen if the test succeeds.")
-	  t))
+        t
+        (progn
+          (setq FAILURE-INDICATION 
+            "FAILURE-INDICATION is not seen if the test succeeds.")
+          t))
 
        )))
 
@@ -314,13 +314,13 @@ inserted."
     
     (t
       (insert
-	"\n     ;; Each test in the suite is of the form:"
-	"\n     ;;   ([description] probe grader)"
-	"\n     ;;   DESCRIPTION - string"
-	"\n     ;;   PROBE -  a sexp which runs the actual test"
-	"\n     ;;   GRADER - the desired result or a sexp which determines"
-	"\n     ;;   how we did"
-	)))
+        "\n     ;; Each test in the suite is of the form:"
+        "\n     ;;   ([description] probe grader)"
+        "\n     ;;   DESCRIPTION - string"
+        "\n     ;;   PROBE -  a sexp which runs the actual test"
+        "\n     ;;   GRADER - the desired result or a sexp which determines"
+        "\n     ;;   how we did"
+        )))
 
   (insert 
     "\n     (")
@@ -332,8 +332,8 @@ inserted."
       )
     (if update-call-site
       (progn
-	(goto-char update-call-site)
-	(insert " " name)))
+        (goto-char update-call-site)
+        (insert " " name)))
     
     ))
 
@@ -385,7 +385,7 @@ tests and want to move on to another."
   (mapcar 
     (function 
       (lambda (x)
-	(put x 'regression-suite nil)))
+        (put x 'regression-suite nil)))
     suites))
 
 
@@ -402,45 +402,45 @@ Return a list of failure-data if the test failed, otherwise return nil."
   (save-excursion
     (let
       ( obtained
-	(FAILURE-INDICATION nil)
-	success)
-	    
+        (FAILURE-INDICATION nil)
+        success)
+            
       (setq obtained 
-	(condition-case err
+        (condition-case err
 
-	  ;;Eval the probe expression.
-	  (eval (nth 1 item))
+          ;;Eval the probe expression.
+          (eval (nth 1 item))
 
-	  ;;If probe made an error, take its value to be that error.
-	  ;;The grader may be interested in exactly what the error is,
-	  ;;and not trapping the error would stop the entire suite.
-	  (error err)))
+          ;;If probe made an error, take its value to be that error.
+          ;;The grader may be interested in exactly what the error is,
+          ;;and not trapping the error would stop the entire suite.
+          (error err)))
       
       (condition-case err
-	(progn
-	  (setq success
-	    (if (regress-test-is-explicit-p item)
+        (progn
+          (setq success
+            (if (regress-test-is-explicit-p item)
 
-	      ;;An explicit grader succeeds if it returns non-nil
-	      (let ((RESULT obtained))
-		(eval (nth 3 item)))
+              ;;An explicit grader succeeds if it returns non-nil
+              (let ((RESULT obtained))
+                (eval (nth 3 item)))
 
-	      ;;An implicit grader succeeds if it gives the same value
-	      ;;as the probe.
-	      (equal obtained 
-		(eval (nth 2 item)))))
+              ;;An implicit grader succeeds if it gives the same value
+              ;;as the probe.
+              (equal obtained 
+                (eval (nth 2 item)))))
 
-	  (if 
-	    (not success)
-	    (list description item obtained FAILURE-INDICATION)
-	    nil))
-	
-	;;If the grader had an error, catch it and return a special
-	;;error.
-	(error
-	  (list description item obtained err))
-	
-	))))
+          (if 
+            (not success)
+            (list description item obtained FAILURE-INDICATION)
+            nil))
+        
+        ;;If the grader had an error, catch it and return a special
+        ;;error.
+        (error
+          (list description item obtained err))
+        
+        ))))
 
 
 (defun regress (&rest suites)
@@ -448,12 +448,12 @@ Return a list of failure-data if the test failed, otherwise return nil."
     (mapcar (function symbol-value) 
       (regress-prompt-for-suites "Run" )))
   (let ((description nil)
-	 (failures nil)
-	 (test-count 0)
-	 (fail-count 0)
-	 suite item
-	 ideal;;Never used. 
-	 new-failure) 
+         (failures nil)
+         (test-count 0)
+         (fail-count 0)
+         suite item
+         ideal;;Never used. 
+         new-failure) 
     
     (while suites
       (setq suite (car suites)
@@ -466,22 +466,22 @@ Return a list of failure-data if the test failed, otherwise return nil."
         (setq item (car suite))
         ;; Untitled test (and no nil placeholder, so add the placeholder
         (if (and (car item) (not (stringp (car item))))
-	  (setq item (cons nil item)))
+          (setq item (cons nil item)))
 
 
-	(setq new-failure
-	  (regress-do-test item description))
-	  
-	(if
-	  new-failure
-	  (setq 
-	    failures    (cons new-failure failures)
-	    fail-count  (1+ fail-count)
-	    ;; only report the suite name the first time.
-	    description nil))
-	  
+        (setq new-failure
+          (regress-do-test item description))
+          
+        (if
+          new-failure
+          (setq 
+            failures    (cons new-failure failures)
+            fail-count  (1+ fail-count)
+            ;; only report the suite name the first time.
+            description nil))
+          
         (setq suite (cdr suite)
-	  test-count (1+ test-count)))
+          test-count (1+ test-count)))
       
       (if description
           ;; there were no failures, simply record the suite title
@@ -599,8 +599,8 @@ Return a list of failure-data if the test failed, otherwise return nil."
     (pp (nth 2 item)))
     
     (if (or 
-	  (not (regress-test-is-explicit-p item))
-	  (regress-sexp-contains 'RESULT (nth 3 item)))
+          (not (regress-test-is-explicit-p item))
+          (regress-sexp-contains 'RESULT (nth 3 item)))
       ;; The test used the return value, so print it
       (progn
         (princ "\n\nActual Value:\n------------\n")
@@ -611,9 +611,9 @@ Return a list of failure-data if the test failed, otherwise return nil."
     (if
       (>= (length failure) 4)
       (progn
-	(princ "\n\nFailure indication:\n------------\n")
-	(pp (nth 3 failure))
-	))
+        (princ "\n\nFailure indication:\n------------\n")
+        (pp (nth 3 failure))
+        ))
     
 
   (terpri) (terpri)
@@ -637,26 +637,26 @@ Return a list of failure-data if the test failed, otherwise return nil."
   (let (lis nam)
     (while 
       (not 
-	(zerop
-	  (length
-	    (setq nam
-	      (completing-read
-		(concat verb " test suite "
-		  (if lis
-		    "(Return when done)"
-		    "(Return for all)")
-		  ": ")
-		obarray
-		(function (lambda (x) (get x 'regression-suite)))
-		t)))))
+        (zerop
+          (length
+            (setq nam
+              (completing-read
+                (concat verb " test suite "
+                  (if lis
+                    "(Return when done)"
+                    "(Return for all)")
+                  ": ")
+                obarray
+                (function (lambda (x) (get x 'regression-suite)))
+                t)))))
       (setq lis (cons (intern nam) lis)))
     (if (null lis)
       (mapatoms 
-	(function 
-	  (lambda (x)
-	    (if (get x 'regression-suite)
-	      (setq lis (cons x lis)))
-	    ))))
+        (function 
+          (lambda (x)
+            (if (get x 'regression-suite)
+              (setq lis (cons x lis)))
+            ))))
     lis))
 
 
@@ -727,12 +727,12 @@ otherwise equal is used."
     
     (let* 
       ((ask-name-sym (intern-soft (concat "ask-" (symbol-name name))))
-	(comparer-sym (or comparer 'equal)))
+        (comparer-sym (or comparer 'equal)))
       
       `(if
-	 ,ask-name-sym
-	 (,comparer-sym ,comparand ,name)
-	 t)))
+         ,ask-name-sym
+         (,comparer-sym ,comparand ,name)
+         t)))
 
 
   (defmacro regress-define-grader-function 
@@ -758,39 +758,39 @@ optional."
   
     (let* 
       (
-	(result-sym (gensym))
+        (result-sym (gensym))
 
-	(parmlist
-	  (mapcar
-	    'regress-answer-parm
-	    answerlist))
+        (parmlist
+          (mapcar
+            'regress-answer-parm
+            answerlist))
        
-	(body
-	  (mapcar
-	    ( function
-	      ( lambda (x)
-		;;(regress-answer-test (car x) (cadr x))
-		(apply 'regress-answer-test x)
-		))
-	    answerlist))
+        (body
+          (mapcar
+            ( function
+              ( lambda (x)
+                ;;(regress-answer-test (car x) (cadr x))
+                (apply 'regress-answer-test x)
+                ))
+            answerlist))
 
       
-	(letlist
-	  (loop
-	    for X in decomposition-list
-	    for I from 0
-	    collect `(,X (nth ,I ,result-sym)))));;ch
+        (letlist
+          (loop
+            for X in decomposition-list
+            for I from 0
+            collect `(,X (nth ,I ,result-sym)))));;ch
     
       (require 'cl)
 
       `(defun* ,function-name 
-	 (,result-sym &optional &key;;ch
-	   ,@parmlist)
+         (,result-sym &optional &key;;ch
+           ,@parmlist)
        
-	 (let* 
-	   ,letlist
-	   (and
-	     ,@body))))))
+         (let* 
+           ,letlist
+           (and
+             ,@body))))))
 
 
 
@@ -865,49 +865,49 @@ optional."
       ;;result in different tests.
       (regress-define-grader-function 
 
-	;;It will be named regress-demo5-grader
-	regress-demo5-grader
+        ;;It will be named regress-demo5-grader
+        regress-demo5-grader
 
-	;;This section says to decompose the result of probe, which
-	;;must be a list, into 2 elements, my-first and my-second,
-	;;which can be referenced in the next section.
-	(my-first my-second)
+        ;;This section says to decompose the result of probe, which
+        ;;must be a list, into 2 elements, my-first and my-second,
+        ;;which can be referenced in the next section.
+        (my-first my-second)
 
-	;;This says that the element my-first must be equal to the
-	;;parameter the-first IF that parameter is passed otherwise we
-	;;don't care.  Similarly, my-second / the-second.
-	( (the-first my-first)
-	  (the-second my-second)))
+        ;;This says that the element my-first must be equal to the
+        ;;parameter the-first IF that parameter is passed otherwise we
+        ;;don't care.  Similarly, my-second / the-second.
+        ( (the-first my-first)
+          (the-second my-second)))
 
       (defvar demo5
-	'( 
-	   "How to use a function defined by regress-define-grader-function."
+        '( 
+           "How to use a function defined by regress-define-grader-function."
 
-	   ;;For simplicity, these examples use a literal as the probe.
-	   ( "Test only the first element."
-	     '(5  6)
-	     :test
-	     (regress-demo5-grader RESULT :the-first 5))
-	   
+           ;;For simplicity, these examples use a literal as the probe.
+           ( "Test only the first element."
+             '(5  6)
+             :test
+             (regress-demo5-grader RESULT :the-first 5))
+           
 
-	   ( "Test only the second element."
-	     '(5  6)
-	     :test
-	     (regress-demo5-grader RESULT :the-second 6))
+           ( "Test only the second element."
+             '(5  6)
+             :test
+             (regress-demo5-grader RESULT :the-second 6))
 
-	   ( "Test both."
-	     '(5  6)
-	     :test
-	     (and
-	       (regress-demo5-grader RESULT :the-second 6)
-	       (regress-demo5-grader RESULT :the-first  5)))
+           ( "Test both."
+             '(5  6)
+             :test
+             (and
+               (regress-demo5-grader RESULT :the-second 6)
+               (regress-demo5-grader RESULT :the-first  5)))
 
-	   ( "Deliberate failure."
-	     '(5  6)
-	     :test
-	     (regress-demo5-grader RESULT :the-first 1000))
-	    
-	   ))
+           ( "Deliberate failure."
+             '(5  6)
+             :test
+             (regress-demo5-grader RESULT :the-first 1000))
+            
+           ))
       (put 'demo5 'regression-suite t)
       )))
 
