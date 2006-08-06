@@ -1,5 +1,5 @@
 ;;; regress.el --- Regression test harness for Emacs Lisp code
- 
+  
 ;; Copyright (C) 1997 by Wayne Mesard
 
 ;; Author: Wayne Mesard <wmesard@sgi.com>
